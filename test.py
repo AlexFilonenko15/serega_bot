@@ -29,7 +29,27 @@ def start_poll(message):
     global TG_CHAT_ID
     if message.chat.id not in TG_CHAT_ID:
         TG_CHAT_ID.append(message.chat.id)
-    bot.send_message(message.chat.id, 'Щотижневе опитування налаштовано.')
+    bot.send_message(message.chat.id, 'Щотижневе опитування почалось.')
+
+
+@bot.message_handler(commands=["sendpoll"])
+def send_one_poll(message):
+    bot.send_poll(
+        chat_id=message.chat.id,
+        question='Будеш цієї неділі?',
+        options=['Так','Hi'],
+        is_anonymous=False
+    )
+
+
+
+
+@bot.message_handler(commands=['offpoll'])
+def off_poll(message):
+    global TG_CHAT_ID
+    if message.chat.id in TG_CHAT_ID:
+        TG_CHAT_ID.remove(message.chat.id)
+    bot.send_message(message.chat.id, 'Щотижневе опитування завершилося')
 
 
 
