@@ -4,11 +4,13 @@ from dotenv import load_dotenv
 from telebot import types
 import requests
 import json
-
+from flask import Flask, request
 
 
 load_dotenv()
-bot = telebot.TeleBot(os.environ["BOT_TOKEN"])
+BOT_TOKEN = os.environ["BOT_TOKEN"]
+bot = telebot.TeleBot(BOT_TOKEN)
+server = Flask(__name__)
 
 
 
@@ -62,6 +64,22 @@ def answer(message):
 
 
 
+@server.route(f"/{BOT_TOKEN}", methods=['POST'])
+def webhook():
+    json_str = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_str)
+    bot.process_new_updates([update])
+    return "!", 200
+
+@server.route("/")
+def index():
+    return "Bot is running", 200
 
 
-bot.polling(none_stop=True)
+if __name__ == "__main__":
+    WEBHOOK_URL = os.environ.get("WEBHOOK_URL")  
+    bot.remove_webhook()
+    bot.set_webhook(url=f"{WEBHOOK_URL}/{BOT_TOKEN}")
+    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+
+
